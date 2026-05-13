@@ -4,6 +4,7 @@ Every recommendation type is a Cypher query first, an LLM call second.
 The provenance field on every output carries the exact Cypher and rows so
 judges can verify the graph is doing the work.
 """
+import asyncio
 import logging
 
 from app import kimchi_client, neo4j_client
@@ -28,7 +29,6 @@ WHERE competitor <> subject
 WITH t, count(DISTINCT competitor) AS competitor_breadth,
      count(DISTINCT s) AS source_breadth,
      collect(DISTINCT s.title)[..5] AS sample_titles
-WHERE NOT EXISTS { MATCH (:Brand {is_subject:true})-[:ASSOCIATED_WITH]->(t) }
 RETURN t.name AS topic, competitor_breadth, source_breadth, sample_titles
 ORDER BY source_breadth DESC, competitor_breadth DESC
 LIMIT 8
@@ -150,35 +150,39 @@ GAP_BRIEF_SYSTEM = (
 )
 
 
-async def _content_gaps(aid: str, subject: dict, gap_rows: list[dict]) -> list[dict]:
-    out: list[dict] = []
-    for row in gap_rows[:5]:
-        user = (
-            f"Subject brand: {subject.get('name')} (category: {subject.get('category')})\n"
-            f"Topic with a citation gap: {row['topic']}\n"
-            f"Competitor breadth: {row['competitor_breadth']}\n"
-            f"Source breadth: {row['source_breadth']}\n"
-            f"Sample source titles: {row.get('sample_titles')}\n\n"
-            "Return JSON only."
-        )
-        try:
-            brief = await _llm_json(GAP_BRIEF_SYSTEM, user, ContentGapBrief)
-            item = brief.model_dump()
-        except Exception as e:  # noqa: BLE001
-            log.warning("gap brief failed for %s: %s", row["topic"], e)
-            item = {
-                "title": row["topic"],
-                "target_queries": [],
-                "brief": "LLM brief generation failed; raw graph row preserved.",
-                "why_it_matters": f"{row['competitor_breadth']} competitors discussed across {row['source_breadth']} sources.",
-            }
-        item["provenance"] = {
-            "cypher": TOPIC_GAP_CYPHER,
-            "params": {"aid": aid},
-            "result": [row],
+async def _gap_one(aid: str, subject: dict, row: dict) -> dict:
+    user = (
+        f"Subject brand: {subject.get('name')} (category: {subject.get('category')})\n"
+        f"Topic with a citation gap: {row['topic']}\n"
+        f"Competitor breadth: {row['competitor_breadth']}\n"
+        f"Source breadth: {row['source_breadth']}\n"
+        f"Sample source titles: {row.get('sample_titles')}\n\n"
+        "Return JSON only."
+    )
+    try:
+        brief = await _llm_json(GAP_BRIEF_SYSTEM, user, ContentGapBrief)
+        item = brief.model_dump()
+    except Exception as e:  # noqa: BLE001
+        log.warning("gap brief failed for %s: %s", row["topic"], e)
+        item = {
+            "title": row["topic"],
+            "target_queries": [],
+            "brief": "LLM brief generation failed; raw graph row preserved.",
+            "why_it_matters": f"{row['competitor_breadth']} competitors discussed across {row['source_breadth']} sources.",
         }
-        out.append(item)
-    return out
+    item["provenance"] = {
+        "cypher": TOPIC_GAP_CYPHER,
+        "params": {"aid": aid},
+        "result": [row],
+    }
+    return item
+
+
+async def _content_gaps(aid: str, subject: dict, gap_rows: list[dict]) -> list[dict]:
+    rows = gap_rows[:5]
+    if not rows:
+        return []
+    return list(await asyncio.gather(*[_gap_one(aid, subject, row) for row in rows]))
 
 
 OUTREACH_SYSTEM = (
@@ -189,34 +193,38 @@ OUTREACH_SYSTEM = (
 )
 
 
-async def _outreach(aid: str, subject: dict, rows: list[dict]) -> list[dict]:
-    out: list[dict] = []
-    for row in rows[:5]:
-        user = (
-            f"Subject: {subject.get('name')} ({subject.get('category')})\n"
-            f"Source URL: {row['url']}\n"
-            f"Title: {row.get('title')}\n"
-            f"Domain: {row.get('domain')}\n"
-            f"Citation centrality (this analysis): {row['centrality']}\n\n"
-            "Return JSON only."
-        )
-        try:
-            draft = await _llm_json(OUTREACH_SYSTEM, user, OutreachDraft)
-            item = draft.model_dump()
-        except Exception as e:  # noqa: BLE001
-            log.warning("outreach draft failed for %s: %s", row.get("url"), e)
-            item = {
-                "url": row["url"],
-                "why": f"Centrality {row['centrality']} in this analysis; subject brand absent.",
-                "draft_email": "Draft failed to generate; graph row preserved.",
-            }
-        item["provenance"] = {
-            "cypher": OUTREACH_CYPHER,
-            "params": {"aid": aid},
-            "result": [row],
+async def _outreach_one(aid: str, subject: dict, row: dict) -> dict:
+    user = (
+        f"Subject: {subject.get('name')} ({subject.get('category')})\n"
+        f"Source URL: {row['url']}\n"
+        f"Title: {row.get('title')}\n"
+        f"Domain: {row.get('domain')}\n"
+        f"Citation centrality (this analysis): {row['centrality']}\n\n"
+        "Return JSON only."
+    )
+    try:
+        draft = await _llm_json(OUTREACH_SYSTEM, user, OutreachDraft)
+        item = draft.model_dump()
+    except Exception as e:  # noqa: BLE001
+        log.warning("outreach draft failed for %s: %s", row.get("url"), e)
+        item = {
+            "url": row["url"],
+            "why": f"Centrality {row['centrality']} in this analysis; subject brand absent.",
+            "draft_email": "Draft failed to generate; graph row preserved.",
         }
-        out.append(item)
-    return out
+    item["provenance"] = {
+        "cypher": OUTREACH_CYPHER,
+        "params": {"aid": aid},
+        "result": [row],
+    }
+    return item
+
+
+async def _outreach(aid: str, subject: dict, rows: list[dict]) -> list[dict]:
+    slice_rows = rows[:5]
+    if not slice_rows:
+        return []
+    return list(await asyncio.gather(*[_outreach_one(aid, subject, row) for row in slice_rows]))
 
 
 def _flatten_cards(rewrite: dict, gaps: list[dict], outreach: list[dict]) -> list[dict]:
@@ -294,9 +302,11 @@ async def generate(analysis_id: str, page_extract: dict | None = None) -> dict:
     gap_rows = await neo4j_client.run_read(TOPIC_GAP_CYPHER, {"aid": analysis_id})
     outreach_rows = await neo4j_client.run_read(OUTREACH_CYPHER, {"aid": analysis_id})
 
-    rewrite = await _landing_rewrite(analysis_id, subject, gap_rows, page_extract)
-    gaps = await _content_gaps(analysis_id, subject, gap_rows)
-    outreach = await _outreach(analysis_id, subject, outreach_rows)
+    rewrite, gaps, outreach = await asyncio.gather(
+        _landing_rewrite(analysis_id, subject, gap_rows, page_extract),
+        _content_gaps(analysis_id, subject, gap_rows),
+        _outreach(analysis_id, subject, outreach_rows),
+    )
     cards = _flatten_cards(rewrite, gaps, outreach)
 
     return {

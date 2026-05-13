@@ -86,11 +86,20 @@ async def _run_pipeline(analysis_id: str, url: str) -> None:
         log.exception("background pipeline crashed")
 
 
+async def resolve_analysis(aid: str) -> dict:
+    """In-memory row, or rehydrate from Neo4j when the API process restarted."""
+    a = state.get(aid)
+    if a is not None:
+        return a
+    root = await neo4j_client.fetch_analysis_root_url(aid)
+    if root is None:
+        raise HTTPException(404, "unknown analysis")
+    return state.resurrect(aid, root)
+
+
 @app.get("/analyze/{aid}/status", response_model=StatusResponse)
 async def status(aid: str) -> StatusResponse:
-    a = state.get(aid)
-    if not a:
-        raise HTTPException(404, "unknown analysis")
+    a = await resolve_analysis(aid)
     return StatusResponse(**a)
 
 
@@ -113,31 +122,23 @@ async def stream(aid: str):
 
 @app.get("/analyze/{aid}/graph")
 async def graph(aid: str) -> JSONResponse:
-    a = state.get(aid)
-    if not a:
-        raise HTTPException(404, "unknown analysis")
+    await resolve_analysis(aid)
     return JSONResponse(await graph_queries.fetch_graph(aid))
 
 
 @app.get("/analyze/{aid}/dashboard", response_model=DashboardPayload)
 async def dashboard_view(aid: str) -> DashboardPayload:
-    a = state.get(aid)
-    if not a:
-        raise HTTPException(404, "unknown analysis")
+    await resolve_analysis(aid)
     return await dashboard.fetch(aid)
 
 
 @app.get("/analyze/{aid}/competitors", response_model=CompetitorsPayload)
 async def competitors_view(aid: str) -> CompetitorsPayload:
-    a = state.get(aid)
-    if not a:
-        raise HTTPException(404, "unknown analysis")
+    await resolve_analysis(aid)
     return await competitors.fetch(aid)
 
 
 @app.get("/analyze/{aid}/recommendations")
 async def recs(aid: str) -> JSONResponse:
-    a = state.get(aid)
-    if not a:
-        raise HTTPException(404, "unknown analysis")
+    await resolve_analysis(aid)
     return JSONResponse(await recommendations.generate(aid))

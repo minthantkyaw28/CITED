@@ -36,3 +36,17 @@ def set_recommendations(analysis_id: str, recs: dict) -> None:
     if a is None:
         return
     a["recommendations"] = recs
+
+
+def resurrect(analysis_id: str, url: str = "") -> dict:
+    """Restore in-memory analysis row from Neo4j after API restart (recommendations still lazy unless warmed)."""
+    if analysis_id in _analyses:
+        return _analyses[analysis_id]
+    _analyses[analysis_id] = {
+        "id": analysis_id,
+        "url": url,
+        "status": "done",
+        "error": None,
+        "recommendations": None,
+    }
+    return _analyses[analysis_id]

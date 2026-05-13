@@ -81,3 +81,15 @@ async def healthcheck() -> bool:
     except Exception as e:  # noqa: BLE001
         log.warning("neo4j healthcheck failed: %s", e)
         return False
+
+
+async def fetch_analysis_root_url(analysis_id: str) -> str | None:
+    """Return root URL if an Analysis node exists; None if graph has no such analysis."""
+    rows = await run_read(
+        "MATCH (a:Analysis {id: $aid}) RETURN coalesce(a.root_url, '') AS url LIMIT 1",
+        {"aid": analysis_id},
+    )
+    if not rows:
+        return None
+    url = rows[0].get("url")
+    return str(url) if url is not None else ""

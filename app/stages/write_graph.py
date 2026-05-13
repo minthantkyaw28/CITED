@@ -22,6 +22,13 @@ def _brand_key(name: str, url: str | None = None) -> str:
     return "brand://" + name.strip().lower()
 
 
+def _mention_brand_url(name: str, profile: BrandProfile, root_url: str) -> str:
+    """Align subject mentions with the seeded Brand node (root_url), not brand://slug."""
+    if name.strip().lower() == profile.brand_name.strip().lower():
+        return _brand_key(profile.brand_name, root_url)
+    return _brand_key(name)
+
+
 def _domain(url: str) -> str:
     try:
         return urlparse(url).netloc.lower()
@@ -123,7 +130,7 @@ async def run(
         for c in calls:
             mentions = [
                 {
-                    "url": _brand_key(b.name),
+                    "url": _mention_brand_url(b.name, profile, url),
                     "name": b.name,
                     "rank": b.rank,
                     "sentiment": b.sentiment,

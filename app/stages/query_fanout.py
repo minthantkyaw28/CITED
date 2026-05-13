@@ -1,6 +1,6 @@
 """Stages 3 + 4 — Query and Extract.
 
-Fan every (query, model) across Kimchi in parallel under a semaphore. For each
+Run the primary planned query once per Kimchi model in parallel. For each
 response, run a cheap structured-extract LLM call to pull mentioned brands,
 cited sources, and topics. Individual failures are logged and skipped — the
 pipeline never aborts on one bad call.
@@ -83,7 +83,6 @@ async def _ask_model(query: PlannedQuery, model: str) -> str:
         ],
         json_mode=False,
         temperature=0.7,
-        max_tokens=900,
     )
 
 
@@ -96,7 +95,6 @@ async def _extract(response_text: str) -> ExtractedResponse:
         ],
         json_mode=True,
         temperature=0.0,
-        max_tokens=900,
     )
     extracted = parse_into(raw, ExtractedResponse)
     extracted.cited_sources = _dedupe_sources(extracted.cited_sources)
@@ -118,6 +116,10 @@ async def _one(
         except Exception as e:  # noqa: BLE001
             log.warning("query failed model=%s q=%r err=%s", model, query.text, e)
             bus.publish({"stage": "querying", "model": model, "query_idx": idx, "total": total, "error": str(e)})
+            return None
+        if not response_text.strip():
+            log.warning("query empty model=%s q=%r", model, query.text)
+            bus.publish({"stage": "querying", "model": model, "query_idx": idx, "total": total, "error": "empty response"})
             return None
         try:
             extracted = await _extract(response_text)
@@ -145,15 +147,22 @@ async def run(queries: list[PlannedQuery], models: list[str], bus: EventBus) -> 
     if not models:
         log.warning("no models available — skipping query stage")
         return []
-    pairs = [(q, m) for q in queries for m in models]
+    if not queries:
+        log.warning("no queries planned — skipping query stage")
+        return []
+    primary = queries[0]
+    pairs = [(primary, m) for m in models]
     total = len(pairs)
-    bus.publish({"stage": "querying", "msg": f"fanning out {total} (query, model) pairs across {len(models)} models"})
-    sem = asyncio.Semaphore(settings.QUERY_FANOUT_CONCURRENCY)
+    bus.publish({
+        "stage": "querying",
+        "msg": f"one query per model ({total} Kimchi calls) using primary query",
+    })
+    sem = asyncio.Semaphore(total)  # all models fire at once
     tasks = [
         asyncio.create_task(_one(sem, q, m, i + 1, total, bus))
         for i, (q, m) in enumerate(pairs)
     ]
     results = await asyncio.gather(*tasks)
     calls = [c for c in results if c is not None]
-    bus.publish({"stage": "querying", "msg": f"completed {len(calls)}/{total} (query, model) calls"})
+    bus.publish({"stage": "querying", "msg": f"completed {len(calls)}/{total} model calls"})
     return calls

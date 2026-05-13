@@ -46,9 +46,9 @@ export function DashboardCharts({
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             AI visibility trend
           </p>
-          <div className="mt-4 h-64 min-h-0 min-w-0">
+          <div className="mt-4 h-64 min-h-[16rem] min-w-0">
             {visibilityTrend.length ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
                 <LineChart data={visibilityTrend}>
                   <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
                   <XAxis dataKey="week" stroke="oklch(0.55 0.03 260)" tick={{ fontSize: 10 }} />
@@ -91,9 +91,9 @@ export function DashboardCharts({
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Citations across models
           </p>
-          <div className="mt-4 h-64 min-h-0 min-w-0">
+          <div className="mt-4 h-64 min-h-[16rem] min-w-0">
             {citationsByModel.length ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={256}>
                 <BarChart data={citationsByModel} layout="vertical">
                   <CartesianGrid stroke="oklch(1 0 0 / 6%)" horizontal={false} />
                   <XAxis type="number" stroke="oklch(0.55 0.03 260)" tick={{ fontSize: 10 }} />
@@ -127,9 +127,9 @@ export function DashboardCharts({
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Competitor comparison · GEO vs citations
           </p>
-          <div className="mt-4 h-72 min-h-0 min-w-0">
+          <div className="mt-4 h-72 min-h-[18rem] min-w-0">
             {competitorBars.length ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
                 <BarChart data={competitorBars}>
                   <CartesianGrid stroke="oklch(1 0 0 / 6%)" vertical={false} />
                   <XAxis dataKey="name" stroke="oklch(0.55 0.03 260)" tick={{ fontSize: 10 }} />

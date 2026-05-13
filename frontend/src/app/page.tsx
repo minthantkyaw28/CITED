@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -12,9 +13,23 @@ import {
 
 import { CitedLogo } from "@/components/cited-logo";
 import { HeroAnalyze } from "@/components/landing/hero-analyze";
-import { LandingPreviewChart } from "@/components/landing/landing-preview-chart";
 import { MeshBackground } from "@/components/primitives/mesh-background";
 import { GlassPanel } from "@/components/primitives/glass-panel";
+
+const LandingPreviewChart = dynamic(
+  () =>
+    import("@/components/landing/landing-preview-chart").then((m) => ({
+      default: m.LandingPreviewChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <GlassPanel className="p-4" hoverGlow>
+        <div className="h-28 animate-pulse rounded-lg bg-white/[0.04]" aria-hidden />
+      </GlassPanel>
+    ),
+  },
+);
 
 const features = [
   {

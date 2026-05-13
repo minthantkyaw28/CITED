@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Launch backend (FastAPI on :8000) and frontend (Next.js on :3000) together.
-# Ctrl-C cleans up both.
+# Launch backend (FastAPI on :8000) and frontend (Next.js production on :3000) together.
+# Frontend: webpack `next build` then `next start` (Turbopack is only for `npm run dev`). Ctrl-C cleans up both.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -30,8 +30,11 @@ echo "→ Starting backend  on http://localhost:8000   (log: .tmp/backend.log)"
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > "$BACKEND_LOG" 2>&1 &
 BACKEND_PID=$!
 
+echo "→ Building frontend (Next.js production)…"
+(cd frontend && npm run build)
+
 echo "→ Starting frontend on http://localhost:3000   (log: .tmp/frontend.log)"
-(cd frontend && npm run dev > "$FRONTEND_LOG" 2>&1) &
+(cd frontend && npm run start > "$FRONTEND_LOG" 2>&1) &
 FRONTEND_PID=$!
 
 cleanup() {
@@ -51,7 +54,7 @@ trap cleanup INT TERM EXIT
 sleep 3
 echo ""
 echo "  Backend  : http://localhost:8000   /healthz  /docs"
-echo "  Frontend : http://localhost:3000"
+echo "  Frontend : http://localhost:3000   (next start, production build)"
 echo "  Tail logs: tail -f .tmp/backend.log .tmp/frontend.log"
 echo ""
 echo "→ Streaming both logs below. Ctrl-C to stop everything."

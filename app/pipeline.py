@@ -3,18 +3,20 @@
 Stage flow:
   1. discover  — fetch URL, infer brand profile
   2. plan      — generate buyer-intent queries
-  3. query     — fan out (query × model) across Kimchi
+  3. query     — primary query once per Kimchi model
   4. extract   — structured parse of each response (inline in stage 3)
   5. write     — bulk write to Neo4j
 
-Stage 6 (recommendations) runs lazily when /recommendations is hit.
+Stage 6 (recommendations) runs before marking the run complete so the first
+GET /recommendations returns cached data. If that stage fails, the pipeline still
+finishes and lazily regenerates on next GET.
 
 Failures inside any stage are logged and swallowed where safe; setup failures
 (no Kimchi, no Neo4j) abort the run with status=failed.
 """
 import logging
 
-from app import kimchi_client, state
+from app import kimchi_client, recommendations, state
 from app.events import registry
 from app.page_cache import remember_page
 from app.stages import discover, plan, query_fanout, write_graph
@@ -79,6 +81,14 @@ async def run(analysis_id: str, url: str) -> None:
             bus.publish({"stage": "failed", "where": "write_graph", "error": str(e)})
             return
         bus.publish({"stage": "building_graph", "msg": "graph write complete"})
+
+        state.set_status(analysis_id, "analyzing")
+        bus.publish({"stage": "recommending", "msg": "generating recommendations (cached for API)"})
+        try:
+            await recommendations.generate(analysis_id)
+        except Exception as e:  # noqa: BLE001
+            log.warning("recommendations stage failed: %s", e)
+            bus.publish({"stage": "recommending", "msg": f"skipped: {e}", "warning": True})
 
         state.set_status(analysis_id, "done")
         bus.publish({"stage": "done", "msg": "analysis complete", "responses": len(calls)})

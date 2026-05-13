@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 import { PageHeader } from "@/components/primitives/page-header";
@@ -55,7 +55,7 @@ function ProvenanceDetails({ item }: { item: RecommendationItem }) {
   );
 }
 
-export default function RecommendationsPage() {
+function RecommendationsInner() {
   const searchParams = useSearchParams();
   const analysisId = searchParams.get("id");
   const [payload, setPayload] = useState<RecommendationPayload | null>(null);
@@ -166,5 +166,13 @@ export default function RecommendationsPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function RecommendationsPage() {
+  return (
+    <Suspense fallback={<GlassPanel className="p-6 text-sm text-muted-foreground">Loading…</GlassPanel>}>
+      <RecommendationsInner />
+    </Suspense>
   );
 }

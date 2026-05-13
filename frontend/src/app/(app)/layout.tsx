@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopbar } from "@/components/layout/app-topbar";
 
@@ -8,9 +10,13 @@ export default function AppShellLayout({
 }) {
   return (
     <div className="flex min-h-dvh">
-      <AppSidebar />
+      <Suspense fallback={<aside className="hidden w-60 shrink-0 lg:block" aria-hidden />}>
+        <AppSidebar />
+      </Suspense>
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar />
+        <Suspense fallback={<header className="sticky top-0 z-30 h-14 shrink-0 border-b border-white/10 bg-background/70" />}>
+          <AppTopbar />
+        </Suspense>
         <main className="relative flex-1 p-4 sm:p-6 lg:p-8">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.12]"
