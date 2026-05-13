@@ -12,18 +12,15 @@ from app.stages.recommend import OUTREACH_CYPHER, TOPIC_GAP_CYPHER
 
 ANALYSIS_TOTALS_CYPHER = """
 MATCH (a:Analysis {id: $aid})
-CALL {
-  WITH a
+CALL (a) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(:ModelResponse)-[m:MENTIONS]->(:Brand)
   RETURN count(m) AS total_mentions
 }
-CALL {
-  WITH a
+CALL (a) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(:ModelResponse)-[c:CITES]->(:Source)
   RETURN count(c) AS total_citations
 }
-CALL {
-  WITH a
+CALL (a) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(mr:ModelResponse)
   RETURN count(DISTINCT mr.model) AS total_models
 }
@@ -32,23 +29,21 @@ RETURN total_mentions, total_citations, total_models
 
 BRAND_METRICS_CYPHER = """
 MATCH (a:Analysis {id: $aid})-[:ABOUT]->(subject:Brand)
-CALL {
-  WITH a, subject
+CALL (a) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(:ModelResponse)-[:MENTIONS]->(mentioned:Brand)
-  RETURN collect(DISTINCT mentioned) + [subject] AS brands
+  RETURN collect(DISTINCT mentioned) AS mentioned_brands
 }
+WITH a, subject, mentioned_brands + [subject] AS brands
 UNWIND brands AS brand
 WITH a, subject, brand
 WHERE brand IS NOT NULL
 WITH a, subject, collect(DISTINCT brand) AS deduped
 UNWIND deduped AS brand
-CALL {
-  WITH a, brand
+CALL (a, brand) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(mr:ModelResponse)-[m:MENTIONS]->(brand)
-  RETURN count(m) AS mention_count, collect(DISTINCT mr.model) AS model_names
+  RETURN count(m) AS mention_count, count(DISTINCT mr.model) AS model_mentions
 }
-CALL {
-  WITH a, brand
+CALL (a, brand) {
   OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(mr:ModelResponse)-[:MENTIONS]->(brand)
   OPTIONAL MATCH (mr)-[c:CITES]->(:Source)
   RETURN count(c) AS citation_edge_count
@@ -58,7 +53,7 @@ RETURN brand.name AS name,
        brand = subject AS is_subject,
        mention_count,
        citation_edge_count,
-       size(model_names) AS model_mentions
+       model_mentions
 ORDER BY mention_count DESC, name
 """
 

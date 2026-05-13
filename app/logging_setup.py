@@ -12,6 +12,8 @@ class JsonFormatter(logging.Formatter):
             "msg": record.getMessage(),
             "logger": record.name,
         }
+        if record.exc_info:
+            payload["exc"] = self.formatException(record.exc_info)
         for k, v in record.__dict__.items():
             if k in ("args", "msg", "levelname", "name", "msecs", "created",
                      "relativeCreated", "exc_info", "exc_text", "stack_info",

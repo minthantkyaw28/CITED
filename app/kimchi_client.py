@@ -85,17 +85,27 @@ async def chat(
     temperature: float = 0.7,
     max_tokens: int = 1024,
 ) -> str:
+    # Cache hit — but only return cached non-empty responses; treat empty as a miss.
     cached = await cache.get(model, messages, json_mode)
-    if cached is not None:
+    if cached:
         return cached
 
     client = get_client()
+    is_reasoning = _is_reasoning_model(model)
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
     }
+    # Reasoning models (gpt-5*, o1*, o3*, o4*) burn the `max_tokens` budget on
+    # hidden reasoning tokens FIRST. With a small cap (e.g. 600) they often
+    # exhaust the budget before emitting any visible content and return "".
+    # OpenAI's fix is `max_completion_tokens` (only caps visible output) plus
+    # a much larger budget. Reasoning models also reject custom `temperature`.
+    if is_reasoning:
+        kwargs["max_completion_tokens"] = max(max_tokens * 4, 4000)
+    else:
+        kwargs["max_tokens"] = max_tokens
+        kwargs["temperature"] = temperature
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
     if model in _WEB_SEARCH_MODELS:
@@ -103,10 +113,37 @@ async def chat(
         # other models 400 on unknown tools.
         kwargs["tools"] = [{"type": "web_search_preview"}]
         kwargs["tool_choice"] = "auto"
-    resp = await client.chat.completions.create(**kwargs)
-    text = resp.choices[0].message.content or ""
-    await cache.put(model, messages, json_mode, text)
+
+    # One-shot retry if the model returns an empty body (intermittent on
+    # certain prompts via the Kimchi gateway). Same model, same kwargs.
+    text = ""
+    finish = "?"
+    for attempt in (1, 2):
+        resp = await client.chat.completions.create(**kwargs)
+        text = (resp.choices[0].message.content or "") if resp.choices else ""
+        finish = resp.choices[0].finish_reason if resp.choices else "?"
+        if text.strip():
+            break
+        log.warning(
+            "kimchi empty content: model=%s finish_reason=%s attempt=%d",
+            model, finish, attempt,
+        )
+
+    # Only cache non-empty results — don't pollute the cache with flake.
+    if text.strip():
+        await cache.put(model, messages, json_mode, text)
     return text
+
+
+def _is_reasoning_model(model: str) -> bool:
+    """gpt-5*, o1*, o3*, o4* are reasoning models — different token semantics."""
+    m = model.lower()
+    if m.startswith(("o1", "o3", "o4")):
+        return True
+    if m.startswith("gpt-5"):
+        # gpt-5-chat-latest is NOT a reasoning model; everything else gpt-5* is.
+        return not m.startswith("gpt-5-chat")
+    return False
 
 
 async def healthcheck() -> bool:
