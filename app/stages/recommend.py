@@ -78,14 +78,14 @@ class OutreachDraft(BaseModel):
 
 async def _llm_json(system: str, user: str, model_cls):
     raw = await kimchi_client.chat(
-        model=settings.KIMCHI_FAST_MODEL,
+        model=settings.KIMCHI_RECOMMEND_MODEL,
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
         json_mode=True,
         temperature=0.4,
-        max_tokens=900,
+        max_tokens=600,
     )
     return parse_into(raw, model_cls)
 

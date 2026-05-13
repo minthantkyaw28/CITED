@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   FileText,
   GitBranch,
@@ -26,6 +26,12 @@ const nav = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+
+  function withCurrentParams(href: string) {
+    return query ? `${href}?${query}` : href;
+  }
 
   return (
     <aside className="hidden min-h-dvh w-60 shrink-0 flex-col border-r border-white/10 bg-sidebar/80 py-6 backdrop-blur-xl lg:flex">
@@ -61,7 +67,7 @@ export function AppSidebar() {
             );
           }
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={withCurrentParams(item.href)}>
               {inner}
             </Link>
           );

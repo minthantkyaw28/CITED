@@ -30,6 +30,8 @@ import { optimizedCopy, originalCopy } from "@/lib/mock/rewrite";
 import { scanPhases } from "@/lib/mock/scan";
 
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "1";
+const recommendationResults = new Map<string, RecommendationPayload>();
+const recommendationRequests = new Map<string, Promise<RecommendationPayload>>();
 
 function buildMockDashboard(): DashboardPayload {
   return {
@@ -121,7 +123,25 @@ export async function getCompetitors(id: string): Promise<CompetitorsPayload> {
 
 export async function getRecommendations(id: string): Promise<RecommendationPayload> {
   if (USE_MOCKS) return buildMockRecommendations();
-  return getLiveRecommendations(id);
+  const cached = recommendationResults.get(id);
+  if (cached) return cached;
+
+  const inFlight = recommendationRequests.get(id);
+  if (inFlight) return inFlight;
+
+  const request = getLiveRecommendations(id)
+    .then((payload) => {
+      recommendationResults.set(id, payload);
+      recommendationRequests.delete(id);
+      return payload;
+    })
+    .catch((error) => {
+      recommendationRequests.delete(id);
+      throw error;
+    });
+
+  recommendationRequests.set(id, request);
+  return request;
 }
 
 export function subscribeToAnalysis(

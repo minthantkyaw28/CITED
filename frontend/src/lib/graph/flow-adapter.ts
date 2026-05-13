@@ -26,24 +26,35 @@ function computeLayout(graph: GraphPayload) {
     groups.set(label, group);
   }
 
-  const orderedLabels = ["Brand", "Competitor", "Model", "Keyword", "Query"];
+  const orderedLabels = ["Competitor", "Model", "Keyword", "Query"];
   const centerX = 420;
   const centerY = 280;
-  const radius = 220;
   const layout = new Map<string, { x: number; y: number }>();
 
-  orderedLabels.forEach((label, labelIndex) => {
+  const brandNodes = groups.get("Brand") ?? [];
+  brandNodes.forEach((node, index) => {
+    layout.set(node.id, {
+      x: centerX + index * 120,
+      y: centerY,
+    });
+  });
+
+  orderedLabels.forEach((label) => {
     const nodes = groups.get(label) ?? [];
     if (!nodes.length) return;
-    const anchorAngle = ((Math.PI * 2) / orderedLabels.length) * labelIndex - Math.PI / 2;
-    const anchorX = centerX + Math.cos(anchorAngle) * radius;
-    const anchorY = centerY + Math.sin(anchorAngle) * radius;
+    const anchorByLabel: Record<string, { x: number; y: number }> = {
+      Competitor: { x: centerX - 280, y: centerY },
+      Model: { x: centerX, y: centerY - 220 },
+      Keyword: { x: centerX, y: centerY + 220 },
+      Query: { x: centerX + 280, y: centerY },
+    };
+    const anchor = anchorByLabel[label] ?? { x: centerX, y: centerY };
     nodes.forEach((node, index) => {
       const spreadAngle = nodes.length === 1 ? 0 : ((Math.PI * 2) / nodes.length) * index;
-      const spreadRadius = label === "Brand" ? 0 : 72;
+      const spreadRadius = 90;
       layout.set(node.id, {
-        x: anchorX + Math.cos(spreadAngle) * spreadRadius,
-        y: anchorY + Math.sin(spreadAngle) * spreadRadius,
+        x: anchor.x + Math.cos(spreadAngle) * spreadRadius,
+        y: anchor.y + Math.sin(spreadAngle) * spreadRadius,
       });
     });
   });

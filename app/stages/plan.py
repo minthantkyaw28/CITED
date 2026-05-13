@@ -13,7 +13,6 @@ from app.models import BrandProfile, PlannedQuery, QueryPlan
 log = logging.getLogger(__name__)
 
 SOFT_FLOOR = 12
-SOFT_CEILING = 40
 
 PLAN_SYSTEM = (
     "You generate buyer-intent search queries someone would ask an LLM "
@@ -112,8 +111,8 @@ async def run(profile: BrandProfile) -> QueryPlan:
             continue
         seen.add(key)
         deduped.append(q)
-    if len(deduped) > SOFT_CEILING:
-        deduped = deduped[:SOFT_CEILING]
+    if len(deduped) > settings.QUERY_PLAN_MAX:
+        deduped = deduped[: settings.QUERY_PLAN_MAX]
     plan.queries = deduped
 
     if len(plan.queries) < SOFT_FLOOR:

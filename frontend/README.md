@@ -1,19 +1,41 @@
 # CITED
 
-Hackathon MVP: an **agentic AI visibility** demo — dark, graph-forward UI with mock data, simulated scans (Kimchi / Tessl), and a Neo4j-style citation graph (visualization only; no live database).
+Frontend for the Cited hackathon MVP.
+
+This app is no longer mock-only. It now supports:
+
+- real `POST /analyze` runs against the FastAPI backend
+- live SSE scan logs on `/scan`
+- live dashboard / graph / competitors pages keyed by `analysis_id`
+- live recommendations + rewrite pages backed by the same recommendation payload
+
+The full project overview and backend setup now live in the repo-root README: [README.md](/Users/burgerking/cited/README.md).
 
 ## Stack
 
 Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui (Base UI), Framer Motion, React Flow (`@xyflow/react`), Recharts.
 
-## Run locally
+## Run frontend locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Use **Analyze Website** on the landing page to run the simulated scan (~5s), then explore the dashboard shell (sidebar).
+Open [http://localhost:3000](http://localhost:3000).
+
+For live data, make sure the backend is also running on `http://localhost:8000` and set:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_USE_MOCKS=0
+```
+
+To force frontend-only mock mode:
+
+```env
+NEXT_PUBLIC_USE_MOCKS=1
+```
 
 ```bash
 npm run build   # production check
@@ -31,6 +53,8 @@ npm start       # run production build
 | `/recommendations` | Issue cards + link to rewrite |
 | `/rewrite` | Split-pane rewrite studio |
 | `/competitors` | Comparison table + insight |
+
+Each app route should keep `?id=<analysis_id>` in the URL while navigating inside the app shell.
 
 ## Tessl (spec-driven agent skills)
 
@@ -57,4 +81,6 @@ tessl install
 
 ## Notes
 
-No authentication, crawling, LLM APIs, or Neo4j driver — all intelligence is **mocked** for a fast, investor-style demo.
+- The app shell preserves `analysis_id` across tab switches.
+- Recommendations and rewrite reuse the same payload client-side for a given `analysis_id`.
+- Graph rendering expects the backend Neo-shaped graph payload and computes layout client-side.

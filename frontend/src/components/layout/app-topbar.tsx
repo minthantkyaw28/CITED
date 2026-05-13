@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import {
   Sheet,
@@ -31,6 +31,12 @@ function titleFromPath(path: string) {
 
 export function AppTopbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+
+  function withCurrentParams(href: string) {
+    return query ? `${href}?${query}` : href;
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-white/10 bg-background/70 px-4 backdrop-blur-xl sm:px-6">
@@ -53,7 +59,7 @@ export function AppTopbar() {
               {mobileLinks.map((l) => (
                 <Link
                   key={l.href}
-                  href={l.href}
+                  href={withCurrentParams(l.href)}
                   className={cn(
                     "rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground",
                     pathname.startsWith(l.href) && "bg-primary/15 text-foreground"

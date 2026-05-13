@@ -88,6 +88,35 @@ def _geo_score(mentions: int, total_mentions: int) -> float | None:
     return float(max(5, math.floor(share))) if mentions > 0 else 0.0
 
 
+def _normalize_brand_name(name: str) -> str:
+    return "".join(ch.lower() for ch in (name or "") if ch.isalnum())
+
+
+def _merge_subject_alias_rows(brand_rows: list[dict]) -> list[dict]:
+    subject_row = next((row for row in brand_rows if row.get("is_subject")), None)
+    if not subject_row:
+        return brand_rows
+
+    subject_key = _normalize_brand_name(str(subject_row.get("name") or ""))
+    if not subject_key:
+        return brand_rows
+
+    merged_subject = dict(subject_row)
+    kept_rows: list[dict] = []
+    for row in brand_rows:
+        if row is subject_row:
+            continue
+        row_key = _normalize_brand_name(str(row.get("name") or ""))
+        if row_key and row_key == subject_key:
+            merged_subject["mention_count"] = int(merged_subject.get("mention_count") or 0) + int(row.get("mention_count") or 0)
+            merged_subject["citation_edge_count"] = int(merged_subject.get("citation_edge_count") or 0) + int(row.get("citation_edge_count") or 0)
+            merged_subject["model_mentions"] = int(merged_subject.get("model_mentions") or 0) + int(row.get("model_mentions") or 0)
+            continue
+        kept_rows.append(row)
+
+    return [merged_subject, *kept_rows]
+
+
 async def fetch(analysis_id: str) -> DashboardPayload:
     totals_rows = await neo4j_client.run_read(ANALYSIS_TOTALS_CYPHER, {"aid": analysis_id})
     totals = totals_rows[0] if totals_rows else {}
@@ -95,7 +124,7 @@ async def fetch(analysis_id: str) -> DashboardPayload:
     total_citations = int(totals.get("total_citations") or 0)
     total_models = int(totals.get("total_models") or 0)
 
-    brand_rows = await neo4j_client.run_read(BRAND_METRICS_CYPHER, {"aid": analysis_id})
+    brand_rows = _merge_subject_alias_rows(await neo4j_client.run_read(BRAND_METRICS_CYPHER, {"aid": analysis_id}))
     citations_by_model_rows = await neo4j_client.run_read(CITATIONS_BY_MODEL_CYPHER, {"aid": analysis_id})
     topic_gap_rows = await neo4j_client.run_read(TOPIC_GAP_CYPHER, {"aid": analysis_id})
     outreach_rows = await neo4j_client.run_read(OUTREACH_CYPHER, {"aid": analysis_id})

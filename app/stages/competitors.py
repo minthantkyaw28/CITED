@@ -1,6 +1,6 @@
 from app import neo4j_client
 from app.models import CompetitorInsight, CompetitorRow, CompetitorsPayload
-from app.stages.dashboard import ANALYSIS_TOTALS_CYPHER, BRAND_METRICS_CYPHER, _geo_score
+from app.stages.dashboard import ANALYSIS_TOTALS_CYPHER, BRAND_METRICS_CYPHER, _geo_score, _merge_subject_alias_rows
 
 INTENT_LEADERSHIP_CYPHER = """
 MATCH (a:Analysis {id: $aid})-[:RAN]->(q:Query)-[:ASKED_TO]->(mr:ModelResponse)-[:MENTIONS]->(brand:Brand)
@@ -42,7 +42,7 @@ async def fetch(analysis_id: str) -> CompetitorsPayload:
     totals = totals_rows[0] if totals_rows else {}
     total_mentions = int(totals.get("total_mentions") or 0)
 
-    brand_rows = await neo4j_client.run_read(BRAND_METRICS_CYPHER, {"aid": analysis_id})
+    brand_rows = _merge_subject_alias_rows(await neo4j_client.run_read(BRAND_METRICS_CYPHER, {"aid": analysis_id}))
     intent_rows = await neo4j_client.run_read(INTENT_LEADERSHIP_CYPHER, {"aid": analysis_id})
     max_mentions = max((int(row.get("mention_count") or 0) for row in brand_rows), default=0)
 

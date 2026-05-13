@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
 
-import type { NeoNode } from "@/lib/mock/types";
+import type { NeoNode } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 export type CitationNodeData = {

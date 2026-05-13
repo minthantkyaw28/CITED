@@ -137,7 +137,7 @@ async def competitors_view(aid: str) -> CompetitorsPayload:
 
 @app.get("/analyze/{aid}/recommendations")
 async def recs(aid: str) -> JSONResponse:
-    a = state.get(aid)
-    if not a:
+    recs_payload = await recommendations.generate(aid)
+    if recs_payload.get("error") == "unknown analysis":
         raise HTTPException(404, "unknown analysis")
-    return JSONResponse(await recommendations.generate(aid))
+    return JSONResponse(recs_payload)

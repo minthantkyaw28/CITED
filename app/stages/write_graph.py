@@ -22,6 +22,10 @@ def _brand_key(name: str, url: str | None = None) -> str:
     return "brand://" + name.strip().lower()
 
 
+def _normalize_brand_name(name: str) -> str:
+    return "".join(ch.lower() for ch in (name or "") if ch.isalnum())
+
+
 def _domain(url: str) -> str:
     try:
         return urlparse(url).netloc.lower()
@@ -104,6 +108,7 @@ async def run(
         return
 
     subject_url = _brand_key(profile.brand_name, url)
+    subject_name_key = _normalize_brand_name(profile.brand_name)
 
     async with driver.session() as session:
         await session.run(
@@ -123,7 +128,7 @@ async def run(
         for c in calls:
             mentions = [
                 {
-                    "url": _brand_key(b.name),
+                    "url": subject_url if _normalize_brand_name(b.name) == subject_name_key else _brand_key(b.name),
                     "name": b.name,
                     "rank": b.rank,
                     "sentiment": b.sentiment,

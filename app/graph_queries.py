@@ -27,17 +27,17 @@ WITH a, subject,
      collect(DISTINCT mr { .model, q_text: q.text }) AS responses
 
 // All distinct mentioned brands across the analysis.
-OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(mr2:ModelResponse)-[mrel:MENTIONS]->(b:Brand)
+OPTIONAL MATCH (a)-[:RAN]->(q2:Query)-[:ASKED_TO]->(mr2:ModelResponse)-[mrel:MENTIONS]->(b:Brand)
 WITH a, subject, queries, responses,
      collect(DISTINCT b { .name, .url, .is_subject }) AS brands,
-     collect({model: mr2.model, q_text: head([(q3)-[:ASKED_TO]->(mr2)|q3.text]),
-              brand_name: b.name, rank: mrel.rank}) AS mentions_raw
+     collect(DISTINCT {model: mr2.model, q_text: q2.text,
+              brand_name: b.name, brand_url: b.url, rank: mrel.rank}) AS mentions_raw
 
 // All distinct cited sources.
-OPTIONAL MATCH (a)-[:RAN]->(:Query)-[:ASKED_TO]->(mr3:ModelResponse)-[:CITES]->(s:Source)
+OPTIONAL MATCH (a)-[:RAN]->(q3:Query)-[:ASKED_TO]->(mr3:ModelResponse)-[:CITES]->(s:Source)
 WITH a, subject, queries, responses, brands, mentions_raw,
      collect(DISTINCT s { .url, .domain, .title }) AS sources,
-     collect({model: mr3.model, q_text: head([(q4)-[:ASKED_TO]->(mr3)|q4.text]),
+     collect(DISTINCT {model: mr3.model, q_text: q3.text,
               source_url: s.url}) AS citations_raw
 
 RETURN subject, queries, responses, brands, sources, mentions_raw, citations_raw
@@ -50,6 +50,10 @@ def _safe_div(num: float, den: float) -> float:
 
 def _build_node(node_id: str, labels: list[str], **properties) -> dict:
     return {"id": node_id, "labels": labels, "properties": {k: v for k, v in properties.items() if v is not None}}
+
+
+def _normalize_brand_name(name: str) -> str:
+    return "".join(ch.lower() for ch in (name or "") if ch.isalnum())
 
 
 async def fetch_graph(analysis_id: str) -> dict:
@@ -67,6 +71,15 @@ async def fetch_graph(analysis_id: str) -> dict:
     mentions_raw = [m for m in (row.get("mentions_raw") or []) if m and m.get("brand_name")]
     citations_raw = [c for c in (row.get("citations_raw") or []) if c and c.get("source_url")]
 
+    subject_key = _normalize_brand_name(subject_name)
+
+    def canonical_brand_id(brand_name: str, brand_url: str | None = None) -> str:
+        if _normalize_brand_name(brand_name) == subject_key:
+            return f"brand:{subject_name}"
+        if brand_url:
+            return f"brand:{brand_url}"
+        return f"brand:{brand_name}"
+
     # --- Aggregations for derived scores ---
     total_mentions = len(mentions_raw)
     total_models = len({r["model"] for r in responses if r.get("model")})
@@ -74,9 +87,9 @@ async def fetch_graph(analysis_id: str) -> dict:
     mentions_per_brand: dict[str, int] = {}
     models_per_brand: dict[str, set[str]] = {}
     for m in mentions_raw:
-        name = m["brand_name"]
-        mentions_per_brand[name] = mentions_per_brand.get(name, 0) + 1
-        models_per_brand.setdefault(name, set()).add(m.get("model") or "")
+        brand_id = canonical_brand_id(m["brand_name"], m.get("brand_url"))
+        mentions_per_brand[brand_id] = mentions_per_brand.get(brand_id, 0) + 1
+        models_per_brand.setdefault(brand_id, set()).add(m.get("model") or "")
 
     # citationStrength: fraction of total sources that co-occur with this brand
     # (i.e., were cited by a response that also mentioned the brand).
@@ -90,14 +103,15 @@ async def fetch_graph(analysis_id: str) -> dict:
     for m in mentions_raw:
         key = (m.get("model") or "", m.get("q_text") or "")
         srcs = response_sources.get(key, set())
-        sources_for_brand.setdefault(m["brand_name"], set()).update(srcs)
+        brand_id = canonical_brand_id(m["brand_name"], m.get("brand_url"))
+        sources_for_brand.setdefault(brand_id, set()).update(srcs)
 
-    def brand_scores(name: str) -> dict:
-        mcount = mentions_per_brand.get(name, 0)
+    def brand_scores(brand_id: str) -> dict:
+        mcount = mentions_per_brand.get(brand_id, 0)
         return {
             "geoScore": round(_safe_div(mcount, total_mentions) * 100, 1) if total_mentions else None,
-            "citationStrength": round(_safe_div(len(sources_for_brand.get(name, set())), total_sources), 3) if total_sources else None,
-            "aiVisibility": round(_safe_div(len(models_per_brand.get(name, set())), total_models) * 100, 1) if total_models else None,
+            "citationStrength": round(_safe_div(len(sources_for_brand.get(brand_id, set())), total_sources), 3) if total_sources else None,
+            "aiVisibility": round(_safe_div(len(models_per_brand.get(brand_id, set())), total_models) * 100, 1) if total_models else None,
         }
 
     # --- Build nodes ---
@@ -111,9 +125,10 @@ async def fetch_graph(analysis_id: str) -> dict:
         nodes.append(node)
 
     # Subject brand
-    sscores = brand_scores(subject_name)
+    subject_id = f"brand:{subject_name}"
+    sscores = brand_scores(subject_id)
     add(_build_node(
-        f"brand:{subject_name}",
+        subject_id,
         ["Brand"],
         name=subject_name,
         subtitle=subject.get("category") or "Your brand entity",
@@ -122,11 +137,12 @@ async def fetch_graph(analysis_id: str) -> dict:
 
     # Competitor brands
     for b in brands:
-        if b["name"] == subject_name:
+        brand_id = canonical_brand_id(b["name"], b.get("url"))
+        if brand_id == subject_id:
             continue
-        cscores = brand_scores(b["name"])
+        cscores = brand_scores(brand_id)
         add(_build_node(
-            f"brand:{b['name']}",
+            brand_id,
             ["Competitor"],
             name=b["name"],
             **cscores,
@@ -183,7 +199,7 @@ async def fetch_graph(analysis_id: str) -> dict:
     seen_edges: set[tuple[str, str, str]] = set()
     for m in mentions_raw:
         src = f"model:{m['model']}"
-        tgt = f"brand:{m['brand_name']}"
+        tgt = canonical_brand_id(m["brand_name"], m.get("brand_url"))
         if src not in seen or tgt not in seen:
             continue
         key = (src, tgt, "MENTIONS")

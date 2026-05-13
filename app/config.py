@@ -18,7 +18,12 @@ class Settings:
     # Default model per sponsor docs.
     KIMCHI_FAST_MODEL: str = os.getenv("KIMCHI_FAST_MODEL", "kimi-k2.5")
     KIMCHI_EXTRACT_MODEL: str = os.getenv("KIMCHI_EXTRACT_MODEL", "kimi-k2.5")
+    KIMCHI_RECOMMEND_MODEL: str = os.getenv(
+        "KIMCHI_RECOMMEND_MODEL",
+        os.getenv("KIMCHI_EXTRACT_MODEL", "kimi-k2.5"),
+    )
 
+    QUERY_PLAN_MAX: int = int(os.getenv("QUERY_PLAN_MAX", "12"))
     QUERY_FANOUT_CONCURRENCY: int = int(os.getenv("QUERY_FANOUT_CONCURRENCY", "20"))
 
 
