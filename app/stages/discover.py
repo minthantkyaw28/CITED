@@ -89,16 +89,37 @@ async def run(url: str) -> tuple[BrandProfile, dict[str, str]]:
     html = await fetch(url)
     page = extract_page(html)
 
-    raw = await kimchi_client.chat(
-        model=settings.KIMCHI_FAST_MODEL,
-        messages=[
-            {"role": "system", "content": DISCOVER_SYSTEM},
-            {"role": "user", "content": _user_prompt(url, page)},
-        ],
-        json_mode=True,
-        temperature=0.2,
-        max_tokens=600,
-    )
-    profile = parse_into(raw, BrandProfile)
-    log.info("discover: brand=%s category=%s", profile.brand_name, profile.category)
-    return profile, page
+    messages = [
+        {"role": "system", "content": DISCOVER_SYSTEM},
+        {"role": "user", "content": _user_prompt(url, page)},
+    ]
+
+    # Try the configured fast model first; if it returns empty/unparseable,
+    # fall back across any other available Kimchi model. Discover is too
+    # critical to depend on one model's mood.
+    available = await kimchi_client.list_models()
+    primary = settings.KIMCHI_FAST_MODEL
+    ordered: list[str] = [primary] + [m for m in available if m != primary]
+
+    last_err: Exception | None = None
+    for model in ordered[:4]:  # cap retries
+        try:
+            raw = await kimchi_client.chat(
+                model=model,
+                messages=messages,
+                json_mode=True,
+                temperature=0.2,
+                max_tokens=1500,
+            )
+            if not raw.strip():
+                log.warning("discover: empty response from model=%s", model)
+                continue
+            profile = parse_into(raw, BrandProfile)
+            log.info("discover: brand=%s category=%s model=%s", profile.brand_name, profile.category, model)
+            return profile, page
+        except Exception as e:  # noqa: BLE001
+            log.warning("discover: model=%s failed: %s", model, e)
+            last_err = e
+            continue
+
+    raise RuntimeError(f"discover failed across {len(ordered[:4])} models: {last_err}")
