@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Cited — citation graph engine</title>
+<style>
+  :root { color-scheme: dark; }
+  body { background: #0c0c10; color: #e6e6ea; font: 14px/1.4 ui-monospace, Menlo, Consolas, monospace; margin: 0; padding: 24px; }
+  h1 { margin: 0 0 4px; font-size: 18px; }
+  .sub { color: #888; margin-bottom: 16px; }
+  input[type=url] { width: 520px; max-width: 70%; padding: 8px 10px; background: #16161c; color: #e6e6ea; border: 1px solid #2a2a33; border-radius: 4px; }
+  button { padding: 8px 14px; background: #2b6cff; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  button[disabled] { opacity: 0.5; cursor: not-allowed; }
+  pre { background: #111118; border: 1px solid #22222b; padding: 12px; border-radius: 4px; max-height: 380px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .col { min-width: 0; }
+  h2 { font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 6px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #1d1d26; color: #8db8ff; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1>Cited</h1>
+  <div class="sub">Paste a landing page. Watch how LLMs talk about its category.</div>
+
+  <div>
+    <input id="url" type="url" placeholder="https://example.com" value="https://stripe.com" />
+    <button id="go">Analyze</button>
+    <span id="aid" class="pill" style="display:none;"></span>
+  </div>
+
+  <h2>Live log</h2>
+  <pre id="log">(waiting)</pre>
+
+  <div class="row">
+    <div class="col">
+      <h2>Graph</h2>
+      <pre id="graph">(not yet)</pre>
+    </div>
+    <div class="col">
+      <h2>Recommendations</h2>
+      <pre id="recs">(not yet)</pre>
+    </div>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const log = (line) => { $("log").textContent += "\n" + line; $("log").scrollTop = $("log").scrollHeight; };
+
+$("go").onclick = async () => {
+  const url = $("url").value.trim();
+  if (!url) return;
+  $("go").disabled = true;
+  $("log").textContent = "POST /analyze " + url;
+  $("graph").textContent = "(working...)";
+  $("recs").textContent = "(working...)";
+
+  const r = await fetch("/analyze", {
+    method: "POST",
+    headers: {"content-type": "application/json"},
+    body: JSON.stringify({url}),
+  });
+  if (!r.ok) { log("analyze failed: " + r.status); $("go").disabled = false; return; }
+  const {analysis_id} = await r.json();
+  $("aid").style.display = "inline-block";
+  $("aid").textContent = analysis_id;
+
+  const es = new EventSource(`/analyze/${analysis_id}/stream`);
+  es.onmessage = (ev) => {
+    let data; try { data = JSON.parse(ev.data); } catch { data = ev.data; }
+    log(typeof data === "string" ? data : JSON.stringify(data));
+    if (data && (data.stage === "done" || data.stage === "failed")) {
+      es.close();
+      loadResults(analysis_id);
+    }
+  };
+  es.onerror = () => { log("(sse closed)"); $("go").disabled = false; };
+};
+
+async function loadResults(aid) {
+  try {
+    const g = await fetch(`/analyze/${aid}/graph`).then(r => r.json());
+    $("graph").textContent = JSON.stringify(g, null, 2);
+  } catch (e) { $("graph").textContent = "graph error: " + e; }
+  try {
+    const recs = await fetch(`/analyze/${aid}/recommendations`).then(r => r.json());
+    $("recs").textContent = JSON.stringify(recs, null, 2);
+  } catch (e) { $("recs").textContent = "recs error: " + e; }
+  $("go").disabled = false;
+}
+</script>
+</body>
+</html>

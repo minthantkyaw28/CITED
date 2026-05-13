@@ -1,0 +1,17 @@
+{
+  "name": "vercel-labs/next-skills",
+  "version": "dc1de9caf7612d73f56a8dec3cb1bd6c9ec096b9",
+  "summary": "Auto-generated tile from GitHub (3 skills)",
+  "private": true,
+  "skills": {
+    "next-best-practices": {
+      "path": "skills/next-best-practices/SKILL.md"
+    }
+  },
+  "excludes": {
+    "skills": [
+      "next-cache-components",
+      "next-upgrade"
+    ]
+  }
+}

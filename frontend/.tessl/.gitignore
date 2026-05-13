@@ -1,0 +1,2 @@
+# Track .tessl/tiles/ in this repo so skills are available after clone without re-install.
+# Re-run: tessl install (from project root) to sync from tessl.json if you change versions.

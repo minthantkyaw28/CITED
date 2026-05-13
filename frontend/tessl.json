@@ -1,0 +1,32 @@
+{
+  "name": "CITED",
+  "dependencies": {
+    "vercel-labs/next-skills": {
+      "version": "dc1de9caf7612d73f56a8dec3cb1bd6c9ec096b9",
+      "source": "https://github.com/vercel-labs/next-skills",
+      "include": {
+        "skills": [
+          "next-best-practices"
+        ]
+      }
+    },
+    "neo4j-contrib/neo4j-skills": {
+      "version": "66ed0e14ef6fa33973f21c35f9c03e4738bfb63e",
+      "source": "https://github.com/neo4j-contrib/neo4j-skills",
+      "include": {
+        "skills": [
+          "neo4j-cypher-skill"
+        ]
+      }
+    },
+    "marmelab/atomic-crm": {
+      "version": "bc8fc09f83fc285f503b67fe69308ca9dff6b628",
+      "source": "https://github.com/marmelab/atomic-crm",
+      "include": {
+        "skills": [
+          "frontend-dev"
+        ]
+      }
+    }
+  }
+}
