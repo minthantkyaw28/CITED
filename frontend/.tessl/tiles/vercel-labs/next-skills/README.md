@@ -96,3 +96,4 @@ Each skill follows the [Agent Skills open standard](https://github.com/anthropic
    ---
    ```
 3. For complex skills, add additional `.md` files and reference them from `SKILL.md`
+<!-- chore: note 2026-06-17T12:56:40 -->
