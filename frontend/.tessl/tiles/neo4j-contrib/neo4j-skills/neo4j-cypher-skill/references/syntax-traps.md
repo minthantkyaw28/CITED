@@ -44,3 +44,4 @@ Load this when debugging a syntax error or validating a query before returning i
 | `CALL IN TRANSACTIONS` inside an explicit transaction | Requires auto-commit session |
 | `PERIODIC COMMIT` in LOAD CSV | Deprecated — use `LOAD CSV ... CALL (...) { } IN TRANSACTIONS OF N ROWS` |
 | `toInteger(null)` throws | `toIntegerOrNull(null)` returns `null` safely |
+<!-- chore: note 2026-06-17T12:56:40 -->
