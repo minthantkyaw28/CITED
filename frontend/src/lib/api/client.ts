@@ -195,3 +195,4 @@ export async function getRecommendations(id: string): Promise<RecommendationPayl
   const raw = await fetchJson<Record<string, unknown>>(`/analyze/${id}/recommendations`);
   return normalizeRecommendationsPayload(raw);
 }
+// chore: note 2026-06-18T21:35:44
