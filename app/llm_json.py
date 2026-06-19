@@ -111,3 +111,4 @@ def parse_into(text: str, model_cls: type[T]) -> T:
             last_err = e
             continue
     raise ValueError(f"could not parse LLM output into {model_cls.__name__}: {last_err}\n---\n{text[:400]}")
+# chore: note 2026-06-19T12:53:08
