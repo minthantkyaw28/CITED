@@ -241,3 +241,4 @@ MATCH (m:Movie)
 OPTIONAL CALL apoc.algo.dijkstra(m, $target, 'ROAD', 'distance') YIELD path, weight
 RETURN m.title, weight    // weight is null when no path found
 ```
+<!-- chore: note 2026-06-19T16:16:00 -->
