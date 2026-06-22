@@ -178,3 +178,4 @@ module.exports = {
 ```
 
 Reference: https://nextjs.org/docs/app/building-your-application/upgrading/from-webpack-to-turbopack
+<!-- chore: note 2026-06-22T14:49:31 -->
