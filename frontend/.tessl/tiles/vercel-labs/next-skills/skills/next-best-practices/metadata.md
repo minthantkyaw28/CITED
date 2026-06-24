@@ -299,3 +299,4 @@ export default async function sitemap({
 ```
 
 Generates `/sitemap/0.xml`, `/sitemap/1.xml`, etc.
+<!-- chore: note 2026-06-24T21:11:46 -->
