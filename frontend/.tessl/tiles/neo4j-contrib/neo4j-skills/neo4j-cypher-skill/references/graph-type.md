@@ -159,3 +159,4 @@ CREATE CONSTRAINT IF NOT EXISTS FOR (n:Person)  REQUIRE n.name    IS NOT NULL;
 
 - Docs: `https://neo4j.com/docs/cypher-manual/current/schema/graph-types/`
 - Blog: `https://neo4j.com/blog/developer/graph-type-schema-enforcement-made-easy-preview/`
+<!-- chore: note 2026-06-26T11:48:58 -->
