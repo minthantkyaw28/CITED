@@ -25,4 +25,3 @@ T3.1 — 2026-05-13 — done — frontend/src/components/landing/hero-analyze.ts
 T3.2 — 2026-05-13 — done — frontend/src/app/scan/scan-client.tsx — replaced setInterval/setTimeout with live subscribeToAnalysis(); progress derived from STAGE_ORDER; redirects to /dashboard?id=… on done
 T3.5 — 2026-05-13 — done — frontend/src/app/(app)/recommendations/page.tsx, frontend/src/app/(app)/rewrite/page.tsx — both pages fetch via getRecommendations(); recommendations cards include `View graph evidence` disclosure with Cypher + result rows; rewrite page shows live H1+meta before/after with provenance
 verify — 2026-05-13 — passed — frontend tsc --noEmit + npm run lint clean; backend healthz reports kimchi=true; CORS preflight returns access-control-allow-origin
-<!-- chore: note 2026-06-19T16:16:00 -->
