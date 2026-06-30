@@ -138,3 +138,4 @@ export const config = {
 ## File Conventions Reference
 
 Reference: https://nextjs.org/docs/app/api-reference/file-conventions
+<!-- chore: note 2026-06-30T21:17:34 -->
