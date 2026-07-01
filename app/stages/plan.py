@@ -133,4 +133,3 @@ async def run(profile: BrandProfile) -> QueryPlan:
         )
     log.info("plan: %d queries planned", len(plan.queries))
     return plan
-# chore: note 2026-06-25T15:47:49
