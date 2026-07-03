@@ -49,3 +49,4 @@ export function DashboardKpis({ kpiCards }: DashboardKpisProps) {
     </div>
   );
 }
+// chore: note 2026-07-03T11:39:54
