@@ -11,3 +11,4 @@
 # Knowledge Index <!-- tessl-managed -->
 
 Documentation for dependencies and processes can be found in the [Knowledge Index](./KNOWLEDGE.md)
+<!-- chore: note 2026-07-06T16:32:01 -->
