@@ -71,4 +71,3 @@ Requires `cacheComponents: true` in `next.config.ts`.
 For detailed usage including cache profiles, `cacheLife()`, `cacheTag()`, and `updateTag()`, see the `next-cache-components` skill.
 
 Reference: https://nextjs.org/docs/app/api-reference/directives/use-cache
-<!-- chore: note 2026-06-22T14:49:31 -->
