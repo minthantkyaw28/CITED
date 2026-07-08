@@ -85,3 +85,4 @@ export default async function Page() {
 ```bash
 npx @next/codemod@latest next-async-request-api .
 ```
+<!-- chore: note 2026-07-08T11:11:22 -->
