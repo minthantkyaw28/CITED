@@ -67,3 +67,4 @@ while kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$FRONTEND_PID" 2>/dev/null;
   sleep 1
 done
 kill "$TAIL_PID" 2>/dev/null || true
+# chore: note 2026-07-09T21:05:34
