@@ -119,3 +119,4 @@ export interface GraphPayload {
   nodes: NeoNode[];
   edges: NeoEdge[];
 }
+// chore: note 2026-07-10T12:07:20
