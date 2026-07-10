@@ -347,3 +347,4 @@ CREATE TEXT  INDEX movie_title  IF NOT EXISTS FOR (n:Movie)  ON (n.title);
 // 3. Wait for all to be ONLINE before loading
 SHOW INDEXES YIELD name, state WHERE state <> 'ONLINE' RETURN name, state;
 ```
+<!-- chore: note 2026-07-10T15:40:47 -->
