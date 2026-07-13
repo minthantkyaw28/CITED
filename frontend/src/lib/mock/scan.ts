@@ -16,3 +16,4 @@ export const scanPhases: ScanPhase[] = [
 ];
 
 export const SCAN_REDIRECT_MS = 5200;
+// chore: note 2026-07-13T12:15:22
