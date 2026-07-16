@@ -110,4 +110,3 @@ The Registry file is kept au to date when files are added or removed:
 ## License
 
 This project is licensed under the MIT License, courtesy of [Marmelab](https://marmelab.com). See the [LICENSE.md](./LICENSE.md) file for details.
-<!-- chore: note 2026-07-03T11:39:54 -->
