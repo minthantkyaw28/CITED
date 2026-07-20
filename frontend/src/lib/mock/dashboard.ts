@@ -80,3 +80,4 @@ export const quickInsights = [
       "Dense hero copy scores high for humans but low for extractive answers — models prefer scannable claim lists.",
   },
 ];
+// chore: note 2026-07-20T11:53:52
