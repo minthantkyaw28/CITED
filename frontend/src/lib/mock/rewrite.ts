@@ -14,3 +14,4 @@ What you get:
 Evidence-led workflow: connect your domain, ingest public pages, simulate agent runs (Kimchi workers), and apply Tessl Skills for structured rewrites. Export rewrites to your CMS in one click.
 
 Primary entity: SoftwareApplication · Category: AI visibility / GEO · Proof: SOC 2 in progress, SSO for enterprise, regional data residency on roadmap.`;
+// chore: note 2026-07-21T11:16:04
