@@ -69,3 +69,4 @@ async def fetch(analysis_id: str) -> CompetitorsPayload:
             "aiReadability": "null: not yet derivable from the current graph schema.",
         },
     )
+# chore: note 2026-07-31T15:31:00
