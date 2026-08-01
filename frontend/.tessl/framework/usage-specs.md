@@ -26,4 +26,3 @@ Documentation can be added to the Knowledge Index using the Tessl `registry` too
 - Install relevant docs into the Knowledge Index using `install`
 
 Consult the Spec Registry when deciding which dependencies to install into a project. Likewise, install the documentation for a given dependency after installing it.
-<!-- chore: note 2026-06-18T21:35:44 -->
