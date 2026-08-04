@@ -144,3 +144,4 @@ return new Response(stream, {
 
 **Prefer Server Actions** for mutations triggered from your UI.
 **Use Route Handlers** for external integrations and public APIs.
+<!-- chore: note 2026-08-04T15:38:54 -->
