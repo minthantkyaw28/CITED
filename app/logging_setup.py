@@ -34,3 +34,4 @@ def setup_logging(level: int = logging.INFO) -> None:
     root = logging.getLogger()
     root.handlers = [handler]
     root.setLevel(level)
+# chore: note 2026-08-07T20:18:03
