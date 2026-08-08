@@ -50,4 +50,3 @@ function Badge({
 }
 
 export { Badge, badgeVariants }
-// chore: note 2026-08-07T00:48:19
