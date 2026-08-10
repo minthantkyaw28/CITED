@@ -111,4 +111,3 @@ The `analysis_id` in the query string is the contract between pages.
 - Neo4j remains the durable source of graph data.
 - The frontend caches recommendation payloads per `analysis_id` so `Recommendations` and `Rewrite` reuse the same loaded data.
 - `cache.sqlite` is a local LLM response cache used by the backend.
-<!-- chore: note 2026-07-08T11:11:22 -->
