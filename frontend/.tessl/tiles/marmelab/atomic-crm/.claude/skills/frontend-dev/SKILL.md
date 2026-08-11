@@ -46,4 +46,3 @@ Resources are registered in `root/CRM.tsx` via `<Resource name="contacts" {...co
 - Major pages have desktop and mobile variants. Use `useIsMobile()` to branch.
 - Desktop: 2-column grid layouts. Mobile: single column with `MobileHeader`/`MobileContent`.
 - Mobile lists use `InfiniteListBase` for scroll pagination.
-<!-- chore: note 2026-06-27T20:40:42 -->
