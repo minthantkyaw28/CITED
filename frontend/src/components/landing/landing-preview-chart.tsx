@@ -67,4 +67,3 @@ export function LandingPreviewChart() {
     </GlassPanel>
   );
 }
-// chore: note 2026-08-12T20:19:22
