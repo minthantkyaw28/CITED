@@ -295,3 +295,4 @@ function ClientComponent() {
 | Server Action | Mutations, form submissions | POST only | No |
 | Route Handler | External APIs, webhooks | Any | GET can be cached |
 | Client fetch to API | Client-side reads | Any | HTTP cache headers |
+<!-- chore: note 2026-08-17T13:55:29 -->
