@@ -285,3 +285,4 @@ export default async function Gallery() {
 Clicking a photo → Modal opens (intercepted)
 Direct URL → Full page renders
 Refresh while modal open → Full page renders
+<!-- chore: note 2026-08-19T14:00:07 -->
