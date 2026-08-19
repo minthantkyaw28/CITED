@@ -151,3 +151,4 @@ See [debug-tricks.md](./debug-tricks.md) for:
 - MCP endpoint for AI-assisted debugging
 - Rebuild specific routes with `--debug-build-paths`
 
+<!-- chore: note 2026-08-19T14:00:07 -->
