@@ -103,3 +103,4 @@ Use this to:
 - Quickly verify a build fix without full rebuild
 - Debug static generation issues for specific pages
 - Iterate faster on build errors
+<!-- chore: note 2026-08-19T09:44:04 -->
