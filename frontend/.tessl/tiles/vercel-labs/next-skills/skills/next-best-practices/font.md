@@ -243,3 +243,4 @@ export function Heading({ children }) {
   return <h1 className={playfair.className}>{children}</h1>
 }
 ```
+<!-- chore: note 2026-08-20T09:45:55 -->
