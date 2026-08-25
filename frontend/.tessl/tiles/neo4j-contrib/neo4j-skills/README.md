@@ -130,3 +130,4 @@ Pull requests welcome — new skills or improvements to existing ones.
 ## License
 
 MIT — see the [LICENSE](LICENSE) file for details.
+<!-- chore: note 2026-08-25T14:07:48 -->
