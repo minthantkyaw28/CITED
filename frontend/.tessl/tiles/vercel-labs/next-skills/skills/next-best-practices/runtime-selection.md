@@ -37,4 +37,3 @@ export const runtime = 'edge'
 3. Are all dependencies Edge-compatible?
 
 If unsure, use Node.js runtime.
-<!-- chore: note 2026-07-08T15:37:05 -->
