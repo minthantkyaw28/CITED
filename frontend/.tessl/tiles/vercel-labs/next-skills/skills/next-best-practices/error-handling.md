@@ -225,4 +225,3 @@ app/
 │       └── page.tsx
 └── layout.tsx          # Errors here go to global-error.tsx
 ```
-<!-- chore: note 2026-06-18T21:35:44 -->
