@@ -106,4 +106,3 @@ export async function POST(request: Request) {
   return Response.json({ success: true })
 }
 ```
-<!-- chore: note 2026-07-20T15:22:25 -->
