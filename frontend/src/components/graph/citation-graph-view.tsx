@@ -186,3 +186,4 @@ export function CitationGraphView({ graph }: CitationGraphViewProps) {
     </ReactFlowProvider>
   );
 }
+// chore: note 2026-09-02T13:34:12
