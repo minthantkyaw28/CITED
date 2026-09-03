@@ -139,3 +139,4 @@ import { GoogleMapsEmbed } from '@next/third-parties/google'
 | `<Script>` inside `<Head>` | Wrong placement | Move outside Head |
 | Inline GA/GTM scripts | No optimization | Use `@next/third-parties` |
 | `strategy="beforeInteractive"` outside layout | Won't work | Only use in root layout |
+<!-- chore: note 2026-09-03T17:03:47 -->
