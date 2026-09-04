@@ -216,4 +216,3 @@ Every recommendation returned by Cited must include:
 ```
 
 If you can't fill in `result`, you haven't actually run the query. Don't ship the recommendation.
-<!-- chore: note 2026-07-21T11:16:04 -->
