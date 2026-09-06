@@ -157,4 +157,3 @@ async def run(queries: list[PlannedQuery], models: list[str], bus: EventBus) -> 
     calls = [c for c in results if c is not None]
     bus.publish({"stage": "querying", "msg": f"completed {len(calls)}/{total} (query, model) calls"})
     return calls
-# chore: note 2026-07-30T15:25:52
