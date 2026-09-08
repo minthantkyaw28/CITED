@@ -19,3 +19,4 @@ The topic-gap Cypher in [skills/cypher-for-citation-graphs/SKILL.md](skills/cyph
 - Or scope every read with `MATCH (a:Analysis {id: $aid})-[:ABOUT]->(subject:Brand)` and stop using `Brand.is_subject` as a filter. (The recommend.py reads already do this; the SKILL.md examples and the `COMPETES_WITH` derivation still use the flag.)
 
 Pre-demo: low risk if you only run one analysis per brand. Long-term: fix.
+<!-- chore: note 2026-09-08T13:31:17 -->
