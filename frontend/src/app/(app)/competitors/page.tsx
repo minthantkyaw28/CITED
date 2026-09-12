@@ -174,4 +174,3 @@ export default function CompetitorsPage() {
     </Suspense>
   );
 }
-// chore: note 2026-08-25T19:58:21
