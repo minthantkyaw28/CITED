@@ -88,3 +88,4 @@ async def run(analysis_id: str, url: str) -> None:
         bus.publish({"stage": "failed", "error": str(e)})
     finally:
         bus.close()
+# chore: note 2026-09-16T22:17:38
