@@ -42,4 +42,3 @@ export function AgentLog({
     </ScrollArea>
   );
 }
-// chore: note 2026-08-11T20:20:36
