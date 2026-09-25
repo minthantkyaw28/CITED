@@ -373,3 +373,4 @@ Load on demand:
 - [ ] `MERGE` on constrained key only
 - [ ] No label-free `MATCH (n)`
 - [ ] Schema ops not inside explicit transaction
+<!-- chore: note 2026-09-25T14:33:41 -->
