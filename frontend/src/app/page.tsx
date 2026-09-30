@@ -195,4 +195,3 @@ export default function LandingPage() {
     </div>
   );
 }
-// chore: note 2026-06-16T18:12:19
