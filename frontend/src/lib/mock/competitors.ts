@@ -57,3 +57,4 @@ export const competitorInsight = {
   summary:
     "Vertex Signal dominates AI citations on evaluation queries because their docs expose structured FAQ content, consistent entity IDs across pages, and machine-verifiable claims that map cleanly to buyer-intent questions.",
 };
+// chore: note 2026-10-05T21:13:15
