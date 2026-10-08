@@ -28,3 +28,4 @@ export interface NeoEdge {
 }
 
 export type Severity = "critical" | "high" | "medium" | "low";
+// chore: note 2026-10-08T16:24:36
