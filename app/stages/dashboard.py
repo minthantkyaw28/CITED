@@ -240,4 +240,3 @@ async def fetch(analysis_id: str) -> DashboardPayload:
             "competitor_diff": COMPETITOR_DIFF_CYPHER.strip(),
         },
     )
-# chore: note 2026-10-08T16:24:36
