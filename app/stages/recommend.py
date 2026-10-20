@@ -306,4 +306,3 @@ async def generate(analysis_id: str, page_extract: dict | None = None) -> dict:
         "cards": cards,
         "subject": subject,
     }
-# chore: note 2026-07-27T20:52:00
