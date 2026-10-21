@@ -369,3 +369,4 @@ curl http://localhost:3001/posts
 curl http://localhost:3002/posts
 # Should return identical content
 ```
+<!-- chore: note 2026-10-21T22:41:35 -->
