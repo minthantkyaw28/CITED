@@ -157,3 +157,4 @@ CALL (row) {
 `ON ERROR` options: `FAIL` (default) | `CONTINUE` | `BREAK` | `RETRY FOR N SECS` [2025.03+]
 
 Advantages over `apoc.periodic.iterate`: memory tracking prevents OOM, planner shows execution plan, accurate query statistics, no double entity ID fetch.
+<!-- chore: note 2026-10-26T23:18:05 -->
