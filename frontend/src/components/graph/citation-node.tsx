@@ -48,3 +48,4 @@ function CitationNodeInner({ data }: NodeProps) {
 }
 
 export const CitationNode = memo(CitationNodeInner);
+// chore: note 2026-10-27T18:44:22
