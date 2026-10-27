@@ -29,4 +29,3 @@ export function GlowButton({
     </button>
   );
 }
-// chore: note 2026-07-06T12:56:33
