@@ -55,4 +55,3 @@ export const recommendations: RecommendationItem[] = [
       "Aggregate authoritative references (G2, peer blogs) and mirror factual snippets on your own changelog with citations.",
   },
 ];
-// chore: note 2026-06-26T15:32:11
