@@ -84,4 +84,3 @@ tessl install
 - The app shell preserves `analysis_id` across tab switches.
 - Recommendations and rewrite reuse the same payload client-side for a given `analysis_id`.
 - Graph rendering expects the backend Neo-shaped graph payload and computes layout client-side.
-<!-- chore: note 2026-10-05T18:20:21 -->
