@@ -114,4 +114,3 @@ class CompetitorsPayload(BaseModel):
     rows: list[CompetitorRow] = Field(default_factory=list)
     insight: CompetitorInsight
     provenance: dict[str, Any] = Field(default_factory=dict)
-# chore: note 2026-10-19T23:03:08
