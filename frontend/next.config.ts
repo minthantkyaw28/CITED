@@ -5,4 +5,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-// chore: note 2026-10-01T23:23:30
