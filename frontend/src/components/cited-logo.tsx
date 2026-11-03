@@ -20,4 +20,3 @@ export function CitedLogo({ className }: { className?: string }) {
     </Link>
   );
 }
-// chore: note 2026-08-18T19:52:54
