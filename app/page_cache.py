@@ -12,3 +12,4 @@ def remember_page(analysis_id: str, page: dict[str, str]) -> None:
 
 def get_page(analysis_id: str) -> dict[str, str] | None:
     return _pages.get(analysis_id)
+# chore: note 2026-11-06T19:58:28
