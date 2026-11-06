@@ -157,4 +157,3 @@ async def run(
         await session.run(COMPETES_CYPHER, {"aid": analysis_id})
 
     log.info("write_graph: wrote %d responses for analysis %s", len(calls), analysis_id)
-# chore: note 2026-09-15T22:25:01
