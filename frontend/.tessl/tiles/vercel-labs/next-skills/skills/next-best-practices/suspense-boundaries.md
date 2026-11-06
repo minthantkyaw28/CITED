@@ -65,3 +65,4 @@ If you use `generateStaticParams`, Suspense is optional.
 | `usePathname()` | Yes (dynamic routes) |
 | `useParams()` | No |
 | `useRouter()` | No |
+<!-- chore: note 2026-11-06T16:42:12 -->
