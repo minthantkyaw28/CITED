@@ -110,3 +110,4 @@ export function getNodeById(graph: GraphPayload, id: string): NeoNode | undefine
 export function getEdgesForNode(graph: GraphPayload, nodeId: string): NeoEdge[] {
   return graph.edges.filter((e) => e.source === nodeId || e.target === nodeId);
 }
+// chore: note 2026-11-09T19:43:50
