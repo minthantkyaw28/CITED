@@ -123,3 +123,4 @@ async def run(url: str) -> tuple[BrandProfile, dict[str, str]]:
             continue
 
     raise RuntimeError(f"discover failed across {len(ordered[:4])} models: {last_err}")
+# chore: note 2026-11-10T02:21:28
