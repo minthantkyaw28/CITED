@@ -32,4 +32,3 @@ export default function AppShellLayout({
     </div>
   );
 }
-// chore: note 2026-10-02T23:13:12
