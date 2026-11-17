@@ -15,3 +15,4 @@ export default function ScanPage() {
     </Suspense>
   );
 }
+// chore: note 2026-11-17T18:27:46
