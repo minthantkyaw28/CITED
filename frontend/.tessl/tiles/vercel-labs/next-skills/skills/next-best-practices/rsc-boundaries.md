@@ -157,4 +157,3 @@ export function ClientForm({ onSubmit }: { onSubmit: (data: FormData) => Promise
 | Pass server action to client | Yes | - |
 | Pass `string/number/boolean` | Yes | - |
 | Pass plain object/array | Yes | - |
-<!-- chore: note 2026-07-10T20:51:37 -->
