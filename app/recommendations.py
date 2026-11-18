@@ -25,4 +25,3 @@ async def generate(analysis_id: str) -> dict:
     if a is not None:
         state.set_recommendations(analysis_id, recs)
     return recs
-# chore: note 2026-10-25T13:40:25
