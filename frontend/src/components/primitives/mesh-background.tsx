@@ -91,4 +91,3 @@ export function MeshBackground({ className }: { className?: string }) {
     </div>
   );
 }
-// chore: note 2026-08-25T19:58:21
