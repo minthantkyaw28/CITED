@@ -801,4 +801,3 @@ NEXT
 RETURN a, b, r, r.duration + r.layover AS totalTime
 ORDER BY totalTime ASC LIMIT 5
 ```
-<!-- chore: note 2026-08-28T20:48:56 -->
