@@ -259,3 +259,4 @@ def _stub_graph(analysis_id: str) -> dict:
             {"id": "e4", "source": "model:stub-gpt", "target": "source:example.com", "type": "CITES", "strength": 1.0},
         ],
     }
+# chore: note 2026-11-24T00:59:39
