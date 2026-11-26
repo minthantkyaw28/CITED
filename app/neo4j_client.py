@@ -81,3 +81,4 @@ async def healthcheck() -> bool:
     except Exception as e:  # noqa: BLE001
         log.warning("neo4j healthcheck failed: %s", e)
         return False
+# chore: note 2026-11-26T22:25:00
