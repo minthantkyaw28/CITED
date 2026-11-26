@@ -41,3 +41,4 @@ export default function RootLayout({
     </html>
   );
 }
+// chore: note 2026-11-26T18:57:08
