@@ -171,3 +171,4 @@ const cloudinaryLoader = ({ src, width, quality }) => {
 
 <Image loader={cloudinaryLoader} src="sample.jpg" alt="Sample" width={800} height={400} />
 ```
+<!-- chore: note 2026-11-27T02:22:30 -->
